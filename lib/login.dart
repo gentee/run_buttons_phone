@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'main.dart';
+import 'loading.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -37,7 +39,13 @@ class LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed(HomePage.tag);
+//          Navigator.of(context).pushNamed(HomePage.tag);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomePage(full: true),
+            ),
+          );
         },
         padding: EdgeInsets.all(12),
         color: Colors.lightBlueAccent,
@@ -53,25 +61,49 @@ class LoginPageState extends State<LoginPage> {
       onPressed: () {},
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(RunTitle),
-        leading: Icon(Icons.menu),
+    return Center(
+      child: ListView(
+        shrinkWrap: true,
+        padding: EdgeInsets.fromLTRB(24.0, 30.0, 24.0, 30.0),
+        children: <Widget>[
+          Text('Model: $deviceName'),
+          Text('Unique ID: $deviceID'),
+          ipaddress,
+          SizedBox(height: 8.0),
+          password,
+          SizedBox(height: 24.0),
+          loginButton,
+          Hyperlink(
+              'https://github.com/gentee/run_buttons_phone', 'Documentation'),
+          forgotLabel
+        ],
       ),
-      body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.fromLTRB(24.0, 30.0, 24.0, 30.0),
-          children: <Widget>[
-            ipaddress,
-            SizedBox(height: 8.0),
-            password,
-            SizedBox(height: 24.0),
-            loginButton,
-            forgotLabel
-          ],
-        ),
+    );
+  }
+}
+
+class Hyperlink extends StatelessWidget {
+  final String _url;
+  final String _text;
+
+  Hyperlink(this._url, this._text);
+
+  _launchURL() async {
+    if (await canLaunch(_url)) {
+      await launch(_url);
+    } else {
+      throw 'Could not launch $_url';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      child: Text(
+        _text,
+        style: TextStyle(decoration: TextDecoration.underline),
       ),
+      onTap: _launchURL,
     );
   }
 }
