@@ -1,20 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'main.dart';
+import 'common.dart';
 import 'loading.dart';
 
 class LoginPage extends StatefulWidget {
-  static String tag = 'login-page';
+  LoginPage(this.callback);
+  final Function callback;
   @override
   LoginPageState createState() => new LoginPageState();
 }
 
 class LoginPageState extends State<LoginPage> {
+  final TextEditingController ipController = TextEditingController();
+  final TextEditingController pswController = new TextEditingController();
+
+  void onConnect() {
+    String ip = ipController.text;
+    if (ip.isEmpty) {
+      alertDialog(context, 'Specify IP-address of the desktop.');
+      return;
+    }
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: waitProgress,
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 3), () {
+      Navigator.pop(context); //pop dialog
+      widget.callback(Status.list);
+    });
+  }
+
+  @override
+  void dispose() {
+    ipController.dispose();
+    pswController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final ipaddress = TextFormField(
+    final ipaddress = TextField(
+      controller: ipController,
       autofocus: false,
-      initialValue: '',
       decoration: InputDecoration(
         hintText: 'IP-address',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
@@ -23,6 +55,7 @@ class LoginPageState extends State<LoginPage> {
     );
 
     final password = TextFormField(
+//      controller: pswController,
       autofocus: false,
       obscureText: true,
       decoration: InputDecoration(
@@ -38,44 +71,40 @@ class LoginPageState extends State<LoginPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
-        onPressed: () {
-//          Navigator.of(context).pushNamed(HomePage.tag);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomePage(full: true),
-            ),
-          );
-        },
+        onPressed: () => onConnect(),
         padding: EdgeInsets.all(12),
         color: Colors.lightBlueAccent,
         child: Text('Connect', style: TextStyle(color: Colors.white)),
       ),
     );
-
-    final forgotLabel = FlatButton(
-      child: Text(
-        'Forgot password?',
-        style: TextStyle(color: Colors.black54),
-      ),
-      onPressed: () {},
-    );
-
     return Center(
       child: ListView(
         shrinkWrap: true,
         padding: EdgeInsets.fromLTRB(24.0, 30.0, 24.0, 30.0),
         children: <Widget>[
-          Text('Model: $deviceName'),
-          Text('Unique ID: $deviceID'),
+          Center(
+              child: Text(
+            'Device ID',
+            textScaleFactor: 1.4,
+          )),
+          SizedBox(height: 8.0),
+          Container(
+            color: Colors.grey[200],
+            alignment: Alignment.center,
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: Text(
+              '$deviceID',
+              textScaleFactor: 1.4,
+            ),
+          ),
+          SizedBox(height: 24.0),
           ipaddress,
           SizedBox(height: 8.0),
           password,
           SizedBox(height: 24.0),
           loginButton,
-          Hyperlink(
-              'https://github.com/gentee/run_buttons_phone', 'Documentation'),
-          forgotLabel
+          SizedBox(height: 8.0),
+          Center(child: Hyperlink(HelpURL, 'Documentation')),
         ],
       ),
     );
@@ -101,9 +130,41 @@ class Hyperlink extends StatelessWidget {
     return InkWell(
       child: Text(
         _text,
-        style: TextStyle(decoration: TextDecoration.underline),
+//        style: TextStyle(decoration: TextDecoration.underline),
+        style: DefaultTextStyle.of(context).style.apply(
+            fontSizeFactor: 1.4,
+            decoration: TextDecoration.underline,
+            color: Colors.blue),
       ),
       onTap: _launchURL,
     );
   }
 }
+
+final waitProgress = Container(
+  width: 300.0,
+  height: 200.0,
+  alignment: AlignmentDirectional.center,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: <Widget>[
+      Center(
+        child: SizedBox(
+          height: 50.0,
+          width: 50.0,
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      Container(
+        margin: const EdgeInsets.only(top: 25.0),
+        child: new Center(
+          child: new Text(
+            "Connecting...",
+            style: new TextStyle(color: Colors.grey[600]),
+          ),
+        ),
+      ),
+    ],
+  ),
+);

@@ -2,23 +2,57 @@ import 'package:flutter/material.dart';
 import 'button.dart';
 import 'login.dart';
 import 'loading.dart';
+import 'common.dart';
 
 void main() => runApp(RunButtons());
 
-const RunTitle = 'Run Buttons';
-
-void showMenuSelection(String value) {
-/*    if (<String>[_simpleValue1, _simpleValue2, _simpleValue3].contains(value))
-      _simpleValue = value;
-    showInSnackBar('You selected: $value');*/
-  print(value);
+class RunButtons extends StatefulWidget {
+  @override
+  RunButtonsState createState() => new RunButtonsState();
 }
 
-class RunButtons extends StatelessWidget {
-  final routes = <String, WidgetBuilder>{
-    LoginPage.tag: (context) => LoginPage(),
-    HomePage.tag: (context) => HomePage(full: true),
-  };
+class RunButtonsState extends State<RunButtons> {
+  static var _status = Status.init;
+
+  changeStatus(Status newStatus) {
+    setState(() {
+      _status = newStatus;
+    });
+  }
+
+  Widget showPage() {
+    switch (_status) {
+      case Status.init:
+        {
+          return Center(child: CircularProgressIndicator());
+        }
+        break;
+      case Status.login:
+        {
+          return LoginPage(changeStatus);
+        }
+        break;
+      case Status.list:
+        {
+          return HomePage();
+        }
+        break;
+    }
+    return null;
+  }
+
+  Future<Status> loading() async {
+    await new Future.delayed(const Duration(seconds: 3), () {});
+    await getDeviceDetails();
+    return Status.login;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loading().then((state) => changeStatus(state));
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,32 +60,18 @@ class RunButtons extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      // home: LoginPage(), // HomePage(),
-      routes: routes,
       home: Scaffold(
         appBar: AppBar(
           title: Text(RunTitle),
-          actions: <Widget>[
-            PopupMenuButton<String>(
-              onSelected: showMenuSelection,
-              itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-                const PopupMenuItem<String>(
-                  value: 'Toolbar menu',
-                  child: Text('Toolbar menu'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Right here',
-                  child: Text('Right here'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Hooray!',
-                  child: Text('Hooray!'),
-                ),
-              ],
-            ),
-          ],
+          actions: _status == Status.list ? <Widget>[] : null,
         ),
-        body: Center(
+        body: showPage(),
+      ),
+    );
+  }
+}
+
+/*
           child: FutureBuilder<String>(
             future: loading(),
             builder: (context, snapshot) {
@@ -64,16 +84,9 @@ class RunButtons extends StatelessWidget {
               return CircularProgressIndicator();
             },
           ),
-        ),
-      ),
-    );
-  }
-}
+*/
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.full}) : super(key: key);
-
-  final bool full;
   final List<BtnInfo> btns = [
     BtnInfo(key: '1', title: "MyButton", desc: "Desc", color: 0xff673230),
     BtnInfo(key: '2', desc: "Desc 2", title: "MyButton 2", color: 0xff0000),
@@ -84,8 +97,6 @@ class HomePage extends StatefulWidget {
         title: "Run button",
         color: 0xff0000),
   ];
-
-  static String tag = 'home-page';
   @override
   HomePageState createState() => HomePageState();
 }
@@ -93,34 +104,12 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    final listview = ListView.builder(
+    return ListView.builder(
         itemCount: widget.btns.length,
         itemBuilder: (BuildContext context, int index) {
           return BtnInfoCard(
             item: widget.btns[index],
           );
         });
-
-    return widget.full
-        ? Scaffold(
-            appBar: AppBar(
-              title: Text(RunTitle),
-              leading: Icon(Icons.menu),
-            ),
-            body: listview)
-        : listview;
-/*    return Scaffold(
-      appBar: AppBar(
-        title: Text(RunTitle),
-        leading: Icon(Icons.menu),
-      ),
-      body: ListView.builder(
-          itemCount: widget.btns.length,
-          itemBuilder: (BuildContext context, int index) {
-            return BtnInfoCard(
-              item: widget.btns[index],
-            );
-          }),
-    );*/
   }
 }

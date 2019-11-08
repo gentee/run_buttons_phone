@@ -18,10 +18,3 @@ getDeviceDetails() async {
     deviceID = data.identifierForVendor; //UUID for iOS
   }
 }
-
-Future<String> loading() async {
-  print('Loading');
-  await new Future.delayed(const Duration(seconds: 3), () {});
-//  await getDeviceDetails();
-  return 'ok';
-}
