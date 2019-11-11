@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
-
-class BtnInfo {
-  const BtnInfo({this.key, this.title, this.desc, this.color});
-
-  final String key;
-  final String title;
-  final String desc;
-  final int color;
-}
+import 'package:icons_helper/icons_helper.dart';
+import 'common.dart';
 
 class BtnInfoCard extends StatelessWidget {
   const BtnInfoCard({Key key, this.item}) : super(key: key);
@@ -21,10 +14,12 @@ class BtnInfoCard extends StatelessWidget {
       child: OutlineButton(
           padding: const EdgeInsets.all(10.0),
           child: Row(children: <Widget>[
-            Icon(Icons.lens,
-                color: item.color == null
-                    ? Colors.grey[400]
-                    : Color(0xff000000 + item.color)), // size: 18.0),
+            Icon(
+                getMaterialIcon(name: item.icon) ??
+                    getMaterialIcon(name: defIcon),
+                size: 36.0,
+                color:
+                    item.color == null ? Colors.grey[400] : Color(item.color)),
             SizedBox(width: 10.0),
             Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,6 +36,11 @@ class BtnInfoCard extends StatelessWidget {
                 ]),
           ]),
           onPressed: () {
+            request('/run', pars: {'key': item.key})
+                .then((result) {})
+                .catchError((e) {
+              alertDialog(context, 'Error: $e');
+            });
             // Perform some action
           }),
     );

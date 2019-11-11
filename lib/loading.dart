@@ -1,8 +1,6 @@
 import 'package:device_info/device_info.dart';
 import 'dart:io' show Platform;
-
-String deviceName;
-String deviceID;
+import 'common.dart';
 
 getDeviceDetails() async {
   final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();

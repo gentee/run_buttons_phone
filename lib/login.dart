@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'common.dart';
-import 'loading.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage(this.callback);
@@ -15,11 +14,19 @@ class LoginPageState extends State<LoginPage> {
   final TextEditingController pswController = new TextEditingController();
 
   void onConnect() {
-    String ip = ipController.text;
+    String ip = ipController.text.toLowerCase();
     if (ip.isEmpty) {
       alertDialog(context, 'Specify IP-address of the desktop.');
       return;
     }
+    if (!ip.startsWith('http')) {
+      ip = 'http://' + ip;
+    }
+    if (ip.split(':').length == 2) {
+      ip += ':$DefaultPort';
+    }
+    settings.url = ip;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -29,9 +36,18 @@ class LoginPageState extends State<LoginPage> {
         );
       },
     );
-    new Future.delayed(new Duration(seconds: 3), () {
-      Navigator.pop(context); //pop dialog
-      widget.callback(Status.list);
+    request('/').then((result) {
+      settings.deviceon = result.deviceon;
+      request('/list').then((result) {
+        Navigator.pop(context);
+        widget.callback(Status.list, btns: result.btns);
+      }).catchError((e) {
+        Navigator.pop(context);
+        alertDialog(context, 'Error: $e');
+      });
+    }).catchError((e) {
+      Navigator.pop(context);
+      alertDialog(context, 'Error: $e');
     });
   }
 
@@ -48,7 +64,7 @@ class LoginPageState extends State<LoginPage> {
       controller: ipController,
       autofocus: false,
       decoration: InputDecoration(
-        hintText: 'IP-address',
+        hintText: 'IP-address of the computer',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
