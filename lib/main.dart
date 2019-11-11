@@ -99,7 +99,6 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    print('List $widget.btns');
     return ListView.builder(
         itemCount: widget.btns.length,
         itemBuilder: (BuildContext context, int index) {
