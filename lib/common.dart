@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
@@ -15,13 +16,44 @@ enum Status {
 
 class Settings {
   String url;
+  String ipaddress;
   String password;
   bool deviceon;
+  bool remember;
 
   Settings() {
     url = '';
+    ipaddress = '';
     password = '';
     deviceon = false;
+    remember = false;
+  }
+
+  Map<String, dynamic> toJson() => {
+        'url': url,
+        'ipaddress': ipaddress,
+        'password': remember ? password : '',
+        'deviceon': deviceon,
+        'remember': remember,
+      };
+
+  fromJson(Map<String, dynamic> json) {
+    this.url = json['url'];
+    this.ipaddress = json['ipaddress'];
+    this.password = json['password'] ?? '';
+    this.deviceon = json['deviceon'] ?? false;
+    this.remember = json['remember'] ?? false;
+  }
+
+  read() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('settings');
+    if (data != null) this.fromJson(json.decode(data));
+  }
+
+  save() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString("settings", json.encode(this));
   }
 }
 
@@ -89,6 +121,7 @@ String generateMd5(String input) {
 Future<Result> request(String path, {Map<String, String> pars}) async {
   Result ret;
   var host = settings.url + path;
+  var errMessage = '';
 
   try {
     if (path != '/') {
@@ -111,19 +144,56 @@ Future<Result> request(String path, {Map<String, String> pars}) async {
     if (response.statusCode == 200) {
       try {
         ret = Result.fromJson(json.decode(response.body));
+        if (ret.message.length > 0) {
+          errMessage = ret.message;
+          throw (ret.message);
+        }
       } catch (e) {
-        throw Exception('Fail response from $host $e');
+        if (errMessage.isEmpty) errMessage = 'Fail response from $host';
       }
+    } else if (response.statusCode == 401) {
+      errMessage = 'Unauthorized';
     } else {
-      throw Exception('Invalid request to the server');
+      errMessage = 'Invalid request to the server';
     }
   } catch (e) {
-    if (!e.toString().startsWith('Fail')) {
-      throw Exception('Cannot connect to the host $host $e');
+    if (errMessage.isEmpty) {
+      throw 'Cannot connect to $host';
     }
+    throw Exception(errMessage);
   }
+  if (errMessage.isNotEmpty) throw errMessage;
+
   return ret;
 }
+
+final progress = Container(
+  width: 300.0,
+  height: 200.0,
+  alignment: AlignmentDirectional.center,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: <Widget>[
+      Center(
+        child: SizedBox(
+          height: 50.0,
+          width: 50.0,
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      Container(
+        margin: const EdgeInsets.only(top: 25.0),
+        child: new Center(
+          child: new Text(
+            "Connecting...",
+            style: new TextStyle(color: Colors.grey[600]),
+          ),
+        ),
+      ),
+    ],
+  ),
+);
 
 alertDialog(context, String message) {
   showDialog(

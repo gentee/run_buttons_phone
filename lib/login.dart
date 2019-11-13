@@ -10,8 +10,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  final TextEditingController ipController = TextEditingController();
-  final TextEditingController pswController = new TextEditingController();
+  final TextEditingController ipController =
+      TextEditingController(text: settings.ipaddress);
+  final TextEditingController pswController =
+      new TextEditingController(text: settings.password);
 
   void onConnect() {
     String ip = ipController.text.toLowerCase();
@@ -19,6 +21,8 @@ class LoginPageState extends State<LoginPage> {
       alertDialog(context, 'Specify IP-address of the desktop.');
       return;
     }
+    settings.password = pswController.text;
+    settings.ipaddress = ip;
     if (!ip.startsWith('http')) {
       ip = 'http://' + ip;
     }
@@ -32,13 +36,14 @@ class LoginPageState extends State<LoginPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
-          child: waitProgress,
+          child: progress,
         );
       },
     );
     request('/').then((result) {
       settings.deviceon = result.deviceon;
       request('/list').then((result) {
+        settings.save();
         Navigator.pop(context);
         widget.callback(Status.list, btns: result.btns);
       }).catchError((e) {
@@ -69,9 +74,8 @@ class LoginPageState extends State<LoginPage> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
     );
-
     final password = TextFormField(
-//      controller: pswController,
+      controller: pswController,
       autofocus: false,
       obscureText: true,
       decoration: InputDecoration(
@@ -117,7 +121,15 @@ class LoginPageState extends State<LoginPage> {
           ipaddress,
           SizedBox(height: 8.0),
           password,
-          SizedBox(height: 24.0),
+          SizedBox(height: 6.0),
+          SwitchListTile(
+            value: settings.remember,
+            onChanged: (value) {
+              settings.remember = value;
+            },
+            title: new Text('Remember password'),
+          ),
+          SizedBox(height: 6.0),
           loginButton,
           SizedBox(height: 8.0),
           Center(child: Hyperlink(HelpURL, 'Documentation')),
@@ -156,31 +168,3 @@ class Hyperlink extends StatelessWidget {
     );
   }
 }
-
-final waitProgress = Container(
-  width: 300.0,
-  height: 200.0,
-  alignment: AlignmentDirectional.center,
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: <Widget>[
-      Center(
-        child: SizedBox(
-          height: 50.0,
-          width: 50.0,
-          child: CircularProgressIndicator(),
-        ),
-      ),
-      Container(
-        margin: const EdgeInsets.only(top: 25.0),
-        child: new Center(
-          child: new Text(
-            "Connecting...",
-            style: new TextStyle(color: Colors.grey[600]),
-          ),
-        ),
-      ),
-    ],
-  ),
-);

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'button.dart';
 import 'login.dart';
-import 'loading.dart';
+import 'device.dart';
 import 'common.dart';
 
-void main() => runApp(RunButtons());
+void main() => runApp(new MaterialApp(
+    title: RunTitle,
+    theme: ThemeData(
+      primarySwatch: Colors.blue,
+    ),
+    home: new RunButtons()));
 
 class RunButtons extends StatefulWidget {
   @override
@@ -45,7 +50,17 @@ class RunButtonsState extends State<RunButtons> {
 
   Future<Status> loading() async {
     await getDeviceDetails();
-    return Status.login;
+    await settings.read();
+    var status = Status.login;
+    try {
+      if (settings.remember) {
+        await request('/list').then((result) {
+          status = Status.list;
+          _btns = result.btns;
+        });
+      }
+    } catch (e) {}
+    return status;
   }
 
   @override
@@ -56,36 +71,29 @@ class RunButtonsState extends State<RunButtons> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: RunTitle,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(RunTitle),
+        actions: _status == Status.list
+            ? <Widget>[
+                IconButton(
+                  icon: Icon(Icons.refresh),
+                  onPressed: () {
+                    request('/list').then((result) {
+                      changeStatus(Status.list, btns: result.btns);
+                    }).catchError((e) {
+                      alertDialog(context, 'Error: $e');
+                    });
+                  },
+                ),
+              ]
+            : null,
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(RunTitle),
-          actions: _status == Status.list ? <Widget>[] : null,
-        ),
-        body: showPage(),
-      ),
+      body: showPage(),
+//      ),
     );
   }
 }
-
-/*
-          child: FutureBuilder<String>(
-            future: loading(),
-            builder: (context, snapshot) {
-              print("GET ${snapshot.data}");
-              if (snapshot.hasData) {
-                return LoginPage(); //RRHomePage(full: false); //Text(snapshot.data);
-              } else if (snapshot.hasError) {
-                return Text("${snapshot.error}");
-              }
-              return CircularProgressIndicator();
-            },
-          ),
-*/
 
 class HomePage extends StatefulWidget {
   final List<BtnInfo> btns;
