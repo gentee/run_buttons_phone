@@ -129,7 +129,7 @@ class LoginPageState extends State<LoginPage> {
             },
             title: new Text('Remember password'),
           ),
-          SizedBox(height: 6.0),
+          SizedBox(height: 2.0),
           loginButton,
           SizedBox(height: 8.0),
           Center(child: Hyperlink(HelpURL, 'Documentation')),

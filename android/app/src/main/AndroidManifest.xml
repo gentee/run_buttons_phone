@@ -7,7 +7,7 @@
          FlutterApplication and put your custom class here. -->
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="run_buttons_phone"
+        android:label="Run Buttons"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -29,4 +29,6 @@
             </intent-filter>
         </activity>
     </application>
+    <uses-permission
+     android:name="android.permission.INTERNET" />
 </manifest>
