@@ -1,4 +1,4 @@
-package com.example.run_buttons_phone
+package net.gentee.run_buttons_phone
 
 import android.os.Bundle
 import io.flutter.app.FlutterActivity
