@@ -9,6 +9,9 @@
 * **[Documentation](README.md)**
 * [Run Buttons для компьютера](https://github.com/gentee/run-buttons)
 
+### Youtube
+[![Как это работает](https://img.youtube.com/vi/ipd8pMGdaSs/0.jpg)](https://www.youtube.com/watch?v=ipd8pMGdaSs)
+
 ## Скриншоты
 
 ![Run buttons mobile client](screenshots.png)

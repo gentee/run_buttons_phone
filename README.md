@@ -9,6 +9,9 @@ Mobile application **Run Buttons** allows you to run programs on your computer. 
 * **[Desktop Run Buttons](https://github.com/gentee/run-buttons)**
 * [Документация на русском](README-ru.md)
 
+### Youtube
+[![How it works](https://img.youtube.com/vi/ipd8pMGdaSs/0.jpg)](https://www.youtube.com/watch?v=ipd8pMGdaSs)
+
 ## Screenshots
 
 ![Run buttons mobile client](screenshots.png)
