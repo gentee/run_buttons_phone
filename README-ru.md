@@ -4,6 +4,8 @@
 
 **Run Buttons** является бесплатным приложением с открытыми исходными текстами. 
 
+[<img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="250"/>](https://play.google.com/store/apps/details?id=net.gentee.run_buttons_phone&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
+
 ## Ссылки
 
 * **[Documentation](README.md)**
